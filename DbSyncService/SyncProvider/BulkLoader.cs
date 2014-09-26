@@ -33,10 +33,7 @@ namespace DbSyncService.SyncProvider
         public void TruncateDestinationTables()
         {
             var destinationQueryRunner = new QueryRunner(tableSet.DestinationConnectionStringName);
-            var sourceQueryRunner = new QueryRunner(tableSet.SourceConnectionStringName);
-
             var destinationQueries = new List<SQLQuery>();
-            var sourceQueries = new List<SQLQuery>();
 
             foreach (var tableMap in tableSet.Mappings.Where(ts=>ts.TruncateDestinationAndBulkLoadFromSource).OrderByDescending(ts => ts.Ordinal))
             {
@@ -44,17 +41,19 @@ namespace DbSyncService.SyncProvider
                 var destinationSql = "delete from " + tableMap.FullyQualifiedDestinationTable + ";";
                 var destinationQuery = new SQLQuery(destinationSql, SQLQueryType.NonQuery);
                 destinationQueries.Add(destinationQuery);
-                
-                sourceQueries.Add(syncChangesData.BuildQueryToRemoveChangesForTable(tableMap.SourceSchema, tableMap.SourceTable));
             }
             destinationQueryRunner.RunQuery(destinationQueries, true);
-            sourceQueryRunner.RunQuery(sourceQueries, true);
         }
 
         public void BulkLoadDestinationTables()
         {
+            var sourceQueryRunner = new QueryRunner(tableSet.SourceConnectionStringName);
+
             foreach (var tableMap in tableSet.Mappings.Where(ts=>ts.TruncateDestinationAndBulkLoadFromSource).OrderBy(ts => ts.Ordinal))
             {
+                var query = syncChangesData.BuildQueryToRemoveChangesForTable(tableMap.SourceSchema, tableMap.SourceTable);
+                sourceQueryRunner.RunQuery(query);
+
                 Logging.WriteMessageToApplicationLog("About to bulk load data from " + tableMap.FullyQualifiedSourceTable + " to " + tableMap.FullyQualifiedDestinationTable, EventLogEntryType.Information);
                 using (var bulkCopy = new SqlBulkCopy(DestinationConnectionString, SqlBulkCopyOptions.KeepIdentity))
                 {

@@ -57,7 +57,7 @@ namespace DbSyncService.Utilities
             }
             if (DebugMode)
             {
-                Console.WriteLine(" {0} rows inserted.", numRows);
+                Console.WriteLine(" {0} rows updated.", numRows);
             }
         }
 
@@ -69,7 +69,7 @@ namespace DbSyncService.Utilities
             }
             if (DebugMode)
             {
-                Console.WriteLine(" {0} rows inserted.", numRows);
+                Console.WriteLine(" {0} rows deleted.", numRows);
             }
         }
 
@@ -81,7 +81,7 @@ namespace DbSyncService.Utilities
             }
             if (DebugMode)
             {
-                Console.WriteLine(" {0} rows inserted.", numRows);
+                Console.WriteLine(" {0} rows errored.", numRows);
             }
         }
     }

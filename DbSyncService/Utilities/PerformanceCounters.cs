@@ -39,49 +39,61 @@ namespace DbSyncService.Utilities
 
         public static void AddRowsInserted(long numRows)
         {
-            if (EnablePerformanceCounters)
+            if (numRows > 0)
             {
-                insertCounter.IncrementBy(numRows);
-            }
-            if (DebugMode)
-            {
-                Console.WriteLine(" {0} rows inserted.", numRows);
+                if (EnablePerformanceCounters)
+                {
+                    insertCounter.IncrementBy(numRows);
+                }
+                if (DebugMode)
+                {
+                    Console.WriteLine(" {0} rows inserted.", numRows);
+                }
             }
         }
 
         public static void AddRowsUpdated(long numRows)
         {
-            if (EnablePerformanceCounters)
+            if (numRows > 0)
             {
-                updateCounter.IncrementBy(numRows);
-            }
-            if (DebugMode)
-            {
-                Console.WriteLine(" {0} rows updated.", numRows);
+                if (EnablePerformanceCounters)
+                {
+                    updateCounter.IncrementBy(numRows);
+                }
+                if (DebugMode)
+                {
+                    Console.WriteLine(" {0} rows updated.", numRows);
+                }
             }
         }
 
         public static void AddRowsDeleted(long numRows)
         {
-            if (EnablePerformanceCounters)
+            if (numRows > 0)
             {
-                deleteCounter.IncrementBy(numRows);
-            }
-            if (DebugMode)
-            {
-                Console.WriteLine(" {0} rows deleted.", numRows);
+                if (EnablePerformanceCounters)
+                {
+                    deleteCounter.IncrementBy(numRows);
+                }
+                if (DebugMode)
+                {
+                    Console.WriteLine(" {0} rows deleted.", numRows);
+                }
             }
         }
 
         public static void AddRowsErrored(long numRows)
         {
-            if (EnablePerformanceCounters)
+            if (numRows > 0)
             {
-                errorCounter.IncrementBy(numRows);
-            }
-            if (DebugMode)
-            {
-                Console.WriteLine(" {0} rows errored.", numRows);
+                if (EnablePerformanceCounters)
+                {
+                    errorCounter.IncrementBy(numRows);
+                }
+                if (DebugMode)
+                {
+                    Console.WriteLine(" {0} rows errored.", numRows);
+                }
             }
         }
     }

@@ -1,0 +1,45 @@
+﻿[
+    {
+        "Name": "tableSet1",
+        "SourceConnectionStringName": "mySqlSandbox",
+        "DestinationConnectionStringName": "SqlServerSyncMe",
+        "Enabled": true,
+        "SyncTableSchema": "sandbox",
+        "SyncTableName": "sync_changes",
+        "Mappings": [
+            {
+                "SourceSchema": "sandbox",
+                "SourceTable": "parent1",
+                "DestinationSchema": "dbo",
+                "DestinationTable": "parent1",
+                "TruncateDestinationAndBulkLoadFromSource": "false",
+                "CustomSourceSQLForBulkLoadOnly" :  "",
+                "Ordinal": 1
+            },
+            {
+                "SourceSchema": "sandbox",
+                "SourceTable": "child1",
+                "DestinationSchema": "dbo",
+                "DestinationTable": "child1",
+                "TruncateDestinationAndBulkLoadFromSource": "false",
+                "Ordinal": 2
+            },
+            {
+                "SourceSchema": "sandbox",
+                "SourceTable": "child2",
+                "DestinationSchema": "dbo",
+                "DestinationTable": "child2",
+                "TruncateDestinationAndBulkLoadFromSource": "false",
+                "Ordinal": 3
+            },
+            {
+                "SourceSchema": "sandbox",
+                "SourceTable": "child3",
+                "DestinationSchema": "dbo",
+                "DestinationTable": "child3a",
+                "TruncateDestinationAndBulkLoadFromSource": "false",
+                "Ordinal": 4
+            }
+        ]
+    }
+]

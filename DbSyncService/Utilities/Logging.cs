@@ -10,19 +10,31 @@ namespace DbSyncService.Utilities
 
         public static void WriteToApplicationLog(this Exception exception)
         {
-            EventLog.WriteEntry("MySqlDataMigService", exception.ToString(), EventLogEntryType.Error);
-            if (DebugMode)
+            try
             {
-                Console.WriteLine(exception.ToString());
+                EventLog.WriteEntry("MySqlDataMigService", exception.ToString(), EventLogEntryType.Error);
+                if (DebugMode)
+                {
+                    Console.WriteLine(exception.ToString());
+                }
+            }
+            catch
+            {
             }
         }
 
         public static void WriteMessageToApplicationLog(string message, EventLogEntryType eventLogEntryType)
         {
-            EventLog.WriteEntry("MySqlDataMigService", message, eventLogEntryType);
-            if (DebugMode)
+            try
             {
-                Console.WriteLine("{0} : {1}", eventLogEntryType.ToString(), message);
+                EventLog.WriteEntry("MySqlDataMigService", message, eventLogEntryType);
+                if (DebugMode)
+                {
+                    Console.WriteLine("{0} : {1}", eventLogEntryType.ToString(), message);
+                }
+            }
+            catch
+            {
             }
         }
     }

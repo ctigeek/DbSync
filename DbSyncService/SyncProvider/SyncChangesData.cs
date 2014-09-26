@@ -21,20 +21,12 @@ namespace DbSyncService.SyncProvider
         public List<SyncChange> GetNextSetOfChanges()
         {
             var changes = new List<SyncChange>();
-            try
+            var allTheChanges = GetChanges();
+            if (allTheChanges.Count > 0)
             {
-                var allTheChanges = GetChanges();
-                if (allTheChanges.Count > 0)
-                {
-                    var transactionId = allTheChanges.First().TransactionId;
-                    changes = allTheChanges.Where(c => c.TransactionId == transactionId).OrderBy(c => c.RowId).ToList();
-                    UpdateStatusOfChanges(changes, RowChangeStatus.processing);
-                }
-            }
-            catch (Exception ex)
-            {
-                ex.WriteToApplicationLog();
-                return new List<SyncChange>();
+                var transactionId = allTheChanges.First().TransactionId;
+                changes = allTheChanges.Where(c => c.TransactionId == transactionId).OrderBy(c => c.RowId).ToList();
+                UpdateStatusOfChanges(changes, RowChangeStatus.processing);
             }
             return changes;
         }
@@ -65,10 +57,11 @@ namespace DbSyncService.SyncProvider
 
         private List<SyncChange> GetChanges()
         {
-            string sql = "select * from " + tableSet.FullyQualifiedSyncTableName + " where status = 0 order by id;";
+            string sql = "select * from " + tableSet.FullyQualifiedSyncTableName + " where status = ?status order by id;";
             var changes = new List<SyncChange>();
 
             var query = new SQLQuery(sql);
+            query.Parameters.Add("status", (int)RowChangeStatus.none);
             query.ProcessRow = reader =>
             {
                 changes.Add(SyncChangeFromDataReader(reader));

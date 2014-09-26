@@ -9,6 +9,7 @@
 
     public enum RowChangeStatus
     {
+        //TODO: use numbers from HTTP status codes....
         none = 0,
         processing = 1,
         complete = 99,

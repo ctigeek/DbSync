@@ -46,6 +46,7 @@ namespace DbSyncService.SyncProvider
 
         public void RunTableSets()
         {
+            
             if (Monitor.TryEnter(lockObject))
             {
                 try
@@ -73,10 +74,6 @@ namespace DbSyncService.SyncProvider
                 catch (Exception ex)
                 {
                     ex.WriteToApplicationLog();
-                    if (DebugMode)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
                 }
                 Monitor.Exit(lockObject);
             }

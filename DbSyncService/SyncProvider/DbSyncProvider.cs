@@ -26,11 +26,18 @@ namespace DbSyncService.SyncProvider
 
         public void ProcessSyncChanges()
         {
-            var changes = syncChangesData.GetNextSetOfChanges();
-            while (changes.Count > 0)
+            try
             {
-                ProcessChangeSet(changes);
-                changes = syncChangesData.GetNextSetOfChanges();
+                var changes = syncChangesData.GetNextSetOfChanges();
+                while (changes.Count > 0)
+                {
+                    ProcessChangeSet(changes);
+                    changes = syncChangesData.GetNextSetOfChanges();
+                }
+            }
+            catch (Exception exception)
+            {
+                exception.WriteToApplicationLog();
             }
         }
 
@@ -50,8 +57,11 @@ namespace DbSyncService.SyncProvider
                 }
                 if (queries.Count > 0)
                 {
-                    //TODO: ????
                     destinationDB.RunQuery(queries, true);
+                }
+                else 
+                {
+                    //log???
                 }
                 SetPerformanceCounters(changes);
                 syncChangesData.UpdateStatusOfChanges(changes, RowChangeStatus.complete);
@@ -60,8 +70,9 @@ namespace DbSyncService.SyncProvider
             {
                 try
                 {
-                    //TODO: make sure identity insert is off....
+                    MakeSureIdentityInsertIsOff(changes);
                     ex.WriteToApplicationLog();
+                    PerformanceCounters.AddRowsErrored(changes.Count);
                     syncChangesData.UpdateStatusOfChanges(changes, RowChangeStatus.error);
                 }
                 catch (Exception ex2)
@@ -73,14 +84,19 @@ namespace DbSyncService.SyncProvider
 
         private void SetPerformanceCounters(List<SyncChange> changes)
         {
-            var inserts = changes.Count(c => c.Operation == Operation.insert && c.RowChangeStatus != RowChangeStatus.error);
-            var deletes = changes.Count(c => c.Operation == Operation.delete && c.RowChangeStatus != RowChangeStatus.error);
-            var updates = changes.Count(c => c.Operation == Operation.update && c.RowChangeStatus != RowChangeStatus.error);
-            var errors = changes.Count(c => c.RowChangeStatus == RowChangeStatus.error);
-            PerformanceCounters.AddRowsInserted(inserts);
-            PerformanceCounters.AddRowsDeleted(deletes);
-            PerformanceCounters.AddRowsUpdated(updates);
-            PerformanceCounters.AddRowsErrored(errors);
+            try
+            {
+                var inserts = changes.Count(c => c.Operation == Operation.insert);
+                var deletes = changes.Count(c => c.Operation == Operation.delete);
+                var updates = changes.Count(c => c.Operation == Operation.update);
+                PerformanceCounters.AddRowsInserted(inserts);
+                PerformanceCounters.AddRowsDeleted(deletes);
+                PerformanceCounters.AddRowsUpdated(updates);
+            }
+            catch (Exception exception)
+            {
+                exception.WriteToApplicationLog();
+            }
         }
 
         private List<Tuple<string, object>> GetDataFromSource(SyncChange change)
@@ -105,7 +121,7 @@ namespace DbSyncService.SyncProvider
             bool firstKey = true; //yes, it's hacky
             foreach (var column in tableInfo.Columns.Where(c => c.PrimaryKey).OrderBy(c => c.ColumnID))
             {
-                if (sql.Contains("?" + column.ColumnName))
+                if (sql.Contains("?" + column.ColumnName)) //get rid of this and just throw.....
                 {
                     query.Parameters.Add(column.ColumnName, firstKey ? change.PrimaryKey1 : change.PrimaryKey2);
                 }
@@ -119,6 +135,7 @@ namespace DbSyncService.SyncProvider
                     dataList.Add(new Tuple<string, object>(reader.GetName(i), reader[i]));
                 }
                 return false;
+                //return true here, but have a separate variable to see if this gets called again, if so, throw error...
             };
             sourceDb.RunQuery(query);
             return ConvertDataTypes(dataList);
@@ -172,10 +189,8 @@ namespace DbSyncService.SyncProvider
             foreach (var columnInfo in tableInfo.Columns)
             {
                 var tuple = rowData.First(t => t.Item1 == columnInfo.ColumnName);
-                //TODO: what if it's null? will that insert null or throw an error?
                 query.Parameters.Add("@" + columnInfo.ColumnName, tuple.Item2);
             }
-
             return query;
         }
 
@@ -230,17 +245,35 @@ namespace DbSyncService.SyncProvider
                 else if (tuple.Item2 is MySql.Data.Types.MySqlDateTime)
                 {
                     rowData.Remove(tuple);
-                    rowData.Add(new Tuple<string, object>(tuple.Item1, Convert.ToDateTime(tuple.Item2.ToString())));
+                    var datetime = Convert.ToDateTime(tuple.Item2.ToString());
+                    if (datetime.Year < 1753)
+                    {
+                        datetime = new DateTime(1753, 1, 1);
+                    }
+                    rowData.Add(new Tuple<string, object>(tuple.Item1, datetime));
                 }
-                //TODO: is datetime out of range for SS?
             }
             return rowData;
         }
-        
-        private void MakeSureIdentityInsertIsOff(TableInfo tableInfo)
+
+        private void MakeSureIdentityInsertIsOff(List<SyncChange> changes)
         {
-            var sql = " set identity_insert " + tableInfo.TableName + " OFF;";
-            destinationDB.RunNonQuery(sql);
+            foreach (var change in changes)
+            {
+                var tableMap = tableSet.GetTableMapping(change);
+                var tableInfo = destinationDB.GetTableInfo(tableMap.DestinationSchema, tableMap.DestinationTable);
+                if (tableInfo.Columns.Any(c => c.Identity))
+                {
+                    try
+                    {
+                        sourceDb.RunNonQuery(" set identity_insert " + tableMap.FullyQualifiedSourceTable + " OFF;");
+                    }
+                    catch (Exception exception)
+                    {
+                        exception.WriteToApplicationLog();
+                    }
+                }
+            }
         }
     }
 }

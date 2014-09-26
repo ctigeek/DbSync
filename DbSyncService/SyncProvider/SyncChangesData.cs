@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using DbSyncService.Models;
-using DbSyncService.Utilities;
 using QueryHelper;
 
 namespace DbSyncService.SyncProvider

@@ -242,6 +242,16 @@ namespace DbSyncService.SyncProvider
                     rowData.Remove(tuple);
                     rowData.Add(new Tuple<string, object>(tuple.Item1, Convert.ToInt64(tuple.Item2)));
                 }
+                else if (tuple.Item2 is ushort)
+                {
+                    rowData.Remove(tuple);
+                    rowData.Add(new Tuple<string, object>(tuple.Item1, Convert.ToInt32(tuple.Item2)));
+                }
+                else if (tuple.Item2 is sbyte)
+                {
+                    rowData.Remove(tuple);
+                    rowData.Add(new Tuple<string, object>(tuple.Item1, Convert.ToInt32(tuple.Item2)));
+                }
                 else if (tuple.Item2 is MySql.Data.Types.MySqlDateTime)
                 {
                     rowData.Remove(tuple);
@@ -266,7 +276,7 @@ namespace DbSyncService.SyncProvider
                 {
                     try
                     {
-                        sourceDb.RunNonQuery(" set identity_insert " + tableMap.FullyQualifiedSourceTable + " OFF;");
+                        destinationDB.RunNonQuery(" set identity_insert " + tableMap.FullyQualifiedDestinationTable + " OFF;");
                     }
                     catch (Exception exception)
                     {

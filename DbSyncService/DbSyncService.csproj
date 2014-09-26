@@ -63,12 +63,6 @@
     <Compile Include="Models\TableInfo.cs" />
     <Compile Include="Models\TableMapping.cs" />
     <Compile Include="Models\TableSet.cs" />
-    <Compile Include="ProjectInstaller.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="ProjectInstaller.Designer.cs">
-      <DependentUpon>ProjectInstaller.cs</DependentUpon>
-    </Compile>
     <Compile Include="SyncProvider\BulkLoader.cs" />
     <Compile Include="SyncProvider\DbSyncProvider.cs" />
     <Compile Include="SyncProvider\SyncChangesData.cs" />
@@ -90,11 +84,6 @@
     <None Include="TableMap.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="ProjectInstaller.resx">
-      <DependentUpon>ProjectInstaller.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

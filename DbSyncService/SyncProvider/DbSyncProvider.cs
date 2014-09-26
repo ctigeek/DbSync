@@ -77,8 +77,8 @@ namespace DbSyncService.SyncProvider
             var deletes = changes.Count(c => c.Operation == Operation.delete && c.RowChangeStatus != RowChangeStatus.error);
             var updates = changes.Count(c => c.Operation == Operation.update && c.RowChangeStatus != RowChangeStatus.error);
             var errors = changes.Count(c => c.RowChangeStatus == RowChangeStatus.error);
-            PerformanceCounters.AddRowsDeleted(deletes);
             PerformanceCounters.AddRowsInserted(inserts);
+            PerformanceCounters.AddRowsDeleted(deletes);
             PerformanceCounters.AddRowsUpdated(updates);
             PerformanceCounters.AddRowsErrored(errors);
         }
@@ -91,14 +91,24 @@ namespace DbSyncService.SyncProvider
             {
                 return GetDataForDelete(change);
             }
-            //this is assuming the source and destination tables are named the same *and have the same primary keys!**  ...if we use mapping, then this needs to be updated....
-            var whereColumns = tableInfo.Columns.Where(c => c.PrimaryKey).Select(c => "(" + c.ColumnName + " = ?" + c.ColumnName + ")");
-            string sql = "select * from " + change.TableName + " where " + string.Join(" AND ", whereColumns) + ";";
+            string sql = null;
+            if (!string.IsNullOrEmpty(tableMap.CustomSourceSQLForSyncOnly))
+            {
+                sql = tableMap.CustomSourceSQLForSyncOnly;
+            }
+            else
+            {
+                var whereColumns = tableInfo.Columns.Where(c => c.PrimaryKey).Select(c => "(" + c.ColumnName + " = ?" + c.ColumnName + ")");
+                sql = "select * from " + change.TableName + " where " + string.Join(" AND ", whereColumns) + ";";
+            }
             var query = new SQLQuery(sql);
             bool firstKey = true; //yes, it's hacky
             foreach (var column in tableInfo.Columns.Where(c => c.PrimaryKey).OrderBy(c => c.ColumnID))
             {
-                query.Parameters.Add(column.ColumnName, firstKey ? change.PrimaryKey1 : change.PrimaryKey2);
+                if (sql.Contains("?" + column.ColumnName))
+                {
+                    query.Parameters.Add(column.ColumnName, firstKey ? change.PrimaryKey1 : change.PrimaryKey2);
+                }
                 firstKey = false;
             }
             var dataList = new List<Tuple<string, object>>();

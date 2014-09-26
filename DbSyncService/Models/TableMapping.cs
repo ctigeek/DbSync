@@ -6,6 +6,7 @@ namespace DbSyncService.Models
     {
         public string SourceSchema { get; set; }
         public string SourceTable { get; set; }
+        public string CustomSourceSQLForSyncOnly { get; set; }
         public string DestinationSchema { get; set; }
         public string DestinationTable { get; set; }
         public bool TruncateDestinationAndBulkLoadFromSource { get; set; }

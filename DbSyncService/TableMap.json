@@ -8,12 +8,13 @@
         "SyncTableName": "sync_changes",
         "Mappings": [
             {
+                "CustomSourceSQLForSyncOnly" :  "select id, field1, field2 from parent1 where id = ?id;",
                 "SourceSchema": "sandbox",
                 "SourceTable": "parent1",
                 "DestinationSchema": "dbo",
                 "DestinationTable": "parent1",
                 "TruncateDestinationAndBulkLoadFromSource": "false",
-                "CustomSourceSQLForBulkLoadOnly" :  "",
+                "CustomSourceSQLForBulkLoadOnly": "",
                 "Ordinal": 1
             },
             {

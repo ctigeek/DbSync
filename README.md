@@ -1,3 +1,8 @@
+Please read the wiki:
+
+https://github.com/ctigeek/DbSync/wiki
+
+
 DbSync
 ======
 This will copy data from a MySql database to SqlServer database in near real-time.

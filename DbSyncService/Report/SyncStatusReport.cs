@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
@@ -14,11 +15,11 @@ namespace DbSyncService.Report
 {
     public class SyncStatusReport
     {
-        private const string BaseUrl = "";
-        private const string ApiKey = "";
-        private const string Sender = "";
-        private const string Recipient = "";
-        private const string CountSql = "select count(*) from ";
+        private string BaseUrl = ConfigurationManager.AppSettings["BaseUrl"];
+        private string ApiKey = ConfigurationManager.AppSettings["ApiKey"];
+        private string Sender = ConfigurationManager.AppSettings["Sender"];
+        private string Recipient = ConfigurationManager.AppSettings["Recipient"];
+        private string CountSql = "select count(*) from ";
         private HttpClient client;
         private readonly IRestClient restClient; 
         private readonly QueryRunner sourceDB;

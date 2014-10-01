@@ -40,5 +40,11 @@ namespace DbSyncService.Models
             }
             return tableMap;
         }
+
+        public TableMapping GetTableMapping(string schema, string tableName)
+        {
+            var tableMap = Mappings.FirstOrDefault(m => m.SourceTable == tableName && m.SourceSchema == schema);
+            return tableMap;
+        }
     }
 }

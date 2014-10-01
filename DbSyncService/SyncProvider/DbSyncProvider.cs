@@ -115,7 +115,7 @@ namespace DbSyncService.SyncProvider
             else
             {
                 var whereColumns = tableInfo.Columns.Where(c => c.PrimaryKey).Select(c => "(" + c.ColumnName + " = ?" + c.ColumnName + ")");
-                sql = "select * from " + change.TableName + " where " + string.Join(" AND ", whereColumns) + ";";
+                sql = "select * from " + tableMap.FullyQualifiedSourceTable + " where " + string.Join(" AND ", whereColumns) + ";";
             }
             var query = new SQLQuery(sql);
             bool firstKey = true; //yes, it's hacky
@@ -214,8 +214,8 @@ namespace DbSyncService.SyncProvider
             var updates = tableInfo.Columns.Where(c => !c.PrimaryKey).Select(c => "[" + c.ColumnName + "] = @" + c.ColumnName);
             var sql = "update " + tableMap.FullyQualifiedDestinationTable + " set " + string.Join(", ", updates) + " where " + string.Join(" AND ", whereColumns) + ";";
             var query = new SQLQuery(sql, SQLQueryType.NonQuery);
-            AddColumnParametersToQuery(query, tableInfo.Columns, data);
 
+            AddColumnParametersToQuery(query, tableInfo.Columns, data);
             return query;
         }
 

@@ -45,11 +45,16 @@
     <Reference Include="QueryHelper">
       <HintPath>..\packages\QueryHelper.2.0.5380.34160\lib\net45\QueryHelper.dll</HintPath>
     </Reference>
+    <Reference Include="RestSharp">
+      <HintPath>..\packages\RestSharp.104.4.0\lib\net4\RestSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.WebRequest" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -58,15 +63,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\SyncInfo.cs" />
     <Compile Include="Models\TableInfoCache.cs" />
     <Compile Include="Models\SyncChange.cs" />
     <Compile Include="Models\TableInfo.cs" />
     <Compile Include="Models\TableMapping.cs" />
     <Compile Include="Models\TableSet.cs" />
+    <Compile Include="Report\SyncStatusReport.cs" />
     <Compile Include="SyncProvider\BulkLoader.cs" />
     <Compile Include="SyncProvider\DbSyncProvider.cs" />
     <Compile Include="SyncProvider\SyncChangesData.cs" />
     <Compile Include="SyncProvider\SyncManager.cs" />
+    <Compile Include="SyncProvider\TableSetData.cs" />
     <Compile Include="SyncService.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -79,7 +87,9 @@
     <Compile Include="Utilities\PerformanceCounters.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
     <None Include="TableMap.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

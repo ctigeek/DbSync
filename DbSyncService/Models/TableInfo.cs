@@ -9,10 +9,10 @@
 
         public TableInfo(string connectionString, string tableName, string schemaName, ColumnInfo[] columns)
         {
-            this.ConnectionString = connectionString;
-            this.TableName = tableName;
-            this.SchemaName = schemaName;
-            this.Columns = columns;
+            ConnectionString = connectionString;
+            TableName = tableName;
+            SchemaName = schemaName;
+            Columns = columns;
         }
     }
 
@@ -30,15 +30,15 @@
 
         public ColumnInfo(string columnName, int columnId, string dataType, int maxLength, int precision, int scale, bool nullable, bool primaryKey, bool identity)
         {
-            this.ColumnName = columnName;
-            this.ColumnID = columnId;
-            this.DataType = dataType;
-            this.MaxLength = maxLength;
-            this.Precision = precision;
-            this.Scale = scale;
-            this.Nullable = nullable;
-            this.PrimaryKey = primaryKey;
-            this.Identity = identity;
+            ColumnName = columnName;
+            ColumnID = columnId;
+            DataType = dataType;
+            MaxLength = maxLength;
+            Precision = precision;
+            Scale = scale;
+            Nullable = nullable;
+            PrimaryKey = primaryKey;
+            Identity = identity;
         }
     }
 }

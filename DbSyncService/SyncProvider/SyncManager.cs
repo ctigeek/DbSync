@@ -14,6 +14,7 @@ namespace DbSyncService.SyncProvider
     public class SyncManager : IDisposable
     {
         private static object lockObject = new object();
+        private readonly TableSetData tableSetData;
         private readonly Timer timer;
 
         public bool DebugMode { get; set; }
@@ -22,8 +23,9 @@ namespace DbSyncService.SyncProvider
         {
             DebugMode = false;
             var period = Int32.Parse(ConfigurationManager.AppSettings["intervalInSeconds"]);
-            timer = new Timer(period * 1000);
+            timer = new Timer(period*1000);
             timer.Elapsed += timer_Elapsed;
+            tableSetData = new TableSetData();
         }
 
         public void Start()
@@ -46,7 +48,7 @@ namespace DbSyncService.SyncProvider
 
         public void RunTableSets()
         {
-            
+
             if (Monitor.TryEnter(lockObject))
             {
                 try
@@ -55,7 +57,7 @@ namespace DbSyncService.SyncProvider
                     {
                         Console.Write("{0} Syncing.... ", DateTime.Now.ToLongTimeString());
                     }
-                    var tableSets = loadTableSets();
+                    var tableSets = tableSetData.LoadTableSets();
                     DoBulkLoad(tableSets);
 
                     foreach (var tableSet in tableSets)
@@ -85,8 +87,9 @@ namespace DbSyncService.SyncProvider
             {
                 try
                 {
-                    ResetTruncateSettingToFalse();
-                    foreach (var tableset in tableSets.Where(ts => ts.Enabled && ts.Mappings.Any(tm => tm.TruncateDestinationAndBulkLoadFromSource)))
+                    tableSetData.ResetTruncateSettingToFalse();
+                    foreach ( var tableset in tableSets.Where(
+                                ts => ts.Enabled && ts.Mappings.Any(tm => tm.TruncateDestinationAndBulkLoadFromSource)))
                     {
                         var bulkLoader = new BulkLoader(tableset);
                         bulkLoader.TruncateDestinationTables();
@@ -99,37 +102,6 @@ namespace DbSyncService.SyncProvider
                 }
             }
         }
-
-        private List<TableSet> loadTableSets()
-        {
-            var configFile = ConfigurationManager.AppSettings["tableSetConfigFile"];
-            using (var reader = new StreamReader(configFile))
-            {
-                var jsonData = reader.ReadToEnd();
-                reader.Close();
-                var tableSets = JsonConvert.DeserializeObject<List<TableSet>>(jsonData);
-                return tableSets;
-            }
-        }
-
-        private void ResetTruncateSettingToFalse()
-        {
-            var tableSets = loadTableSets();
-            foreach (var tableSet in tableSets)
-            {
-                foreach (var tableMap in tableSet.Mappings)
-                {
-                    tableMap.TruncateDestinationAndBulkLoadFromSource = false;
-                }
-            }
-            var configFile = ConfigurationManager.AppSettings["tableSetConfigFile"];
-            var serializeObject = JsonConvert.SerializeObject(tableSets, Formatting.Indented);
-            using (var writer = new StreamWriter(configFile, false))
-            {
-                writer.WriteLine(serializeObject);
-                writer.Flush();
-                writer.Close();
-            }
-        }
     }
 }
+

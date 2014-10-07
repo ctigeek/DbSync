@@ -20,6 +20,7 @@ namespace DbSyncService.SyncProvider
         private readonly ConnectionStringSettings SourceConnectionSetting;
         private readonly DbProviderFactory sourceDbFactory;
         private readonly SyncChangesData syncChangesData;
+        private readonly int BulkCopyTimeout;
 
         public BulkLoader(TableSet tableSet)
         {
@@ -28,6 +29,14 @@ namespace DbSyncService.SyncProvider
             SourceConnectionSetting = ConfigurationManager.ConnectionStrings[tableSet.SourceConnectionStringName];
             syncChangesData = new SyncChangesData(tableSet);
             sourceDbFactory = DbProviderFactories.GetFactory(SourceConnectionSetting.ProviderName);
+            if (string.IsNullOrEmpty(ConfigurationManager.AppSettings["BulkCopyTimeoutInSeconds"]))
+            {
+                BulkCopyTimeout = 180;
+            }
+            else
+            {
+                BulkCopyTimeout = int.Parse(ConfigurationManager.AppSettings["BulkCopyTimeoutInSeconds"]);
+            }
         }
 
         public void TruncateDestinationTables()
@@ -59,7 +68,7 @@ namespace DbSyncService.SyncProvider
                 {
                     bulkCopy.DestinationTableName = tableMap.FullyQualifiedDestinationTable;
                     bulkCopy.EnableStreaming = true;
-
+                    bulkCopy.BulkCopyTimeout = BulkCopyTimeout;
                     using (var conn = openSourceConnection())
                     {
                         var sql = "select * from " + tableMap.FullyQualifiedSourceTable + ";";
@@ -68,6 +77,7 @@ namespace DbSyncService.SyncProvider
                             sql = tableMap.CustomSourceSQLForBulkLoadOnly;
                         }
                         var command = createCommand(conn, sql);
+                        command.CommandTimeout = BulkCopyTimeout;
                         using (var reader = command.ExecuteReader())
                         {
                             bulkCopy.WriteToServer(reader);

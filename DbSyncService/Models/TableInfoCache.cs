@@ -15,11 +15,14 @@ namespace DbSyncService.Models
         public static TableInfo GetTableInfo(this QueryRunner database, string schema, string tableName)
         {
             var sql = @"SELECT distinct ISNULL(sch.name, '') 'SchemaName', tables.name 'TableName', c.name 'ColumnName', c.column_id 'ColumnID', 
-    t.Name 'Datatype', c.max_length 'MaxLength',  c.precision 'Precision' , c.scale 'Scale', c.is_nullable 'Nullable', ISNULL(i.is_primary_key, 0) 'PrimaryKey', ISNULL(c.is_identity,0) 'IsIdentity'
-	FROM  sys.columns c INNER JOIN sys.types t ON c.user_type_id = t.user_type_id 
+    t.Name 'Datatype', c.max_length 'MaxLength',  c.precision 'Precision' , 
+	c.scale 'Scale', c.is_nullable 'Nullable', 
+	ISNULL((select is_primary_key from sys.indexes i inner join sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id 
+			where ic.object_id = c.object_id AND ic.column_id = c.column_id and is_primary_key = 1),0) as 'PrimaryKey',
+	ISNULL(c.is_identity, 0) 'IsIdentity'
+	 FROM  sys.columns c INNER JOIN 
+	sys.types t ON c.user_type_id = t.user_type_id  
 	INNER JOIN sys.tables tables ON (tables.object_id = c.object_id)
-	LEFT OUTER JOIN sys.index_columns ic ON ic.object_id = c.object_id AND ic.column_id = c.column_id
-	LEFT OUTER JOIN sys.indexes i ON ic.object_id = i.object_id AND ic.index_id = i.index_id
 	LEFT OUTER JOIN sys.schemas sch on (sch.schema_id = tables.schema_id)
 	WHERE c.object_id = OBJECT_ID(@tableName) order by TableName, ColumnID;";
 

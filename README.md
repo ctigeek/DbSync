@@ -1,3 +1,6 @@
+WARNING: this code has some known issues if the column names in the two tables don't match exactly.
+
+
 Please read the wiki:
 
 https://github.com/ctigeek/DbSync/wiki
